@@ -11,7 +11,7 @@ Feverup is a company that gives its customers money every week in exchange for j
 ## Install
 ```bash
 $ git clone https://github.com/offk0rs/feverup.git
-$ cd feverup
+$ cd feverup/server/
 $ npm install
 $ npm run start
 ```

@@ -1,0 +1,23 @@
+{
+  "name": "fever",
+  "version": "0.0.1",
+  "description": "Unofficial fever partial api",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon app.js"
+  },
+  "author": "offk0rs",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "iconv-lite": "^0.5.1",
+    "request": "^2.88.2",
+    "uuid": "^8.0.0",
+    "uuid-random": "^1.3.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.3"
+  }
+}
