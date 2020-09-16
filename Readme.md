@@ -17,7 +17,7 @@ $ npm run start
 ```
 ## Usage
 ### Login
-Since fever does not have a login method with username and password, it can only be done through google, you must have the phone rooted to access to the login data.
+Since fever does not have a login method with username and password, it can only be done through facebook, you must have the phone rooted to access to the login data.
 You must go to the folder:
  ```/data/data/com.feverup.fever/shared_prefs```
 extract from the file 
@@ -25,22 +25,11 @@ extract from the file
 which is an xml, the entire LAST_LOGIN_REQUEST property.
 The method to login and obtain an access token is as follows
 ```
-POST: localhost:5000/api/googleLogin
+POST: localhost:5000/api/facebookLogin
 ```
 and you have to add the next values to body request:
 ```
-"google_id":req.body.google_id,
-"middle_name":req.body.middle_name,
-"client_version":req.body.client_version,
-"first_name":req.body.first_name,
-"last_name":req.body.last_name,
-"birthday":req.body.birthday,
-"gender":req.body.gender,
-"email":req.body.email,
-"avatar_url":req.body.avatar_url,
-"suuid":YOU CAN INVENT THIS FIELD
-"auth_token":req.body.auth_token,
-"client_id":req.body.client_id,
+"auth_token":req.body.auth_token
 ```
 and the api will return api token for other requests
 <img src="resources/token.png" >

@@ -17,8 +17,8 @@ apiRouter.get('/getPlanInfo/:planId',function(req,res){
     feverApi.getPlanInfo(req,res);
 })
 
-apiRouter.post('/googleLogin/',function(req,res){
-    feverApi.googleLogin(req,res);
+apiRouter.post('/facebookLogin/',function(req,res){
+    feverApi.fbLogin(req,res);
 })
 
 apiRouter.post('/redeem',function(req,res){
