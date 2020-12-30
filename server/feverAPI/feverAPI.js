@@ -45,7 +45,7 @@ function organize(req,body){
         }
         Promise.all(promiseArray).then(function(values) {
             for(const hit of values){
-                if(hit.description.match(new RegExp('(?<=\\b'+ req.query.regexWord +'\\s)(\\w+)')) != nul){
+                if(hit.description.match(new RegExp('(?<=\\b'+ req.query.regexWord +'\\s)(\\w+)')) != null){
                     coupons.cupones.push( {"id" : hit.id,"coupon" : hit.description.match(new RegExp('(?<=\\b'+ req.query.regexWord +'\\s)(\\w+)'))[0],defaultSession:hit.defaultSession})
                 }
             }   
