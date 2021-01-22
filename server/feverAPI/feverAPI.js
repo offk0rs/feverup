@@ -4,91 +4,42 @@ const https = require('https')
 
 const base = "https://beam.feverup.com:443/api/4.1";
 
-function findCoupons(req, res){
-    const url = "https://i80y2bqlsl-dsn.algolia.net:443/1/indexes/Fever-"+ req.query.city +"/query";
+function refreshToken(req,res){
+    const url = "https://beam.feverup.com:443/api/4.2/login/refresh/";
     options = {
         url : url,
-        headers:{
-            "X-Algolia-API-Key": "e4226055c240f9e38e89794dcfb91766", 
-            "X-Algolia-Application-Id": "I80Y2BQLSL",
-            "User-Agent": "Algolia for Android (3.27.0); Android (6.0.1)"
+        headers : {
+            "Authorization": "Bearer " + req.body.auth_token,
+            "Accept": "application/json",
+            "Screen": "android@xxhdpi",
+            "X-Client-Version": "5.4.20",
+            "User-Agent": "Android Fever/5.4.20 Dalvik/2.1.0 (Linux; U; Android 10; MI 8 MIUI/V12.0.1.0.QEAMIXM)",
+            "Accept-Language": "es",
+            "Content-Type": "application/json",
+            "Accept-Encoding": "gzip, deflate"
+
         },
-        json:{
-            "params":"filters=&hitsPerPage="+ req.query.hitsPerPage +"&page="+ req.query.page +"&query="+ req.query.query
+        json : {
+            "refresh":req.body.refresh_token
         }
+        
     }
     request.post(options,function(error,response,body){
         if(error !== null){
             res.status(500).send()
         } else {
             if(response.statusCode !== 200){
-                res.status(404).send()
+                res.status(response.statusCode).send()
             } else {
-                organize(req,body).then((values) => {
-                    res.status(200).send(values)
-                });
+                res.status(200).send({"token": body.access})
             }
         }
     });
-}
 
-function organize(req,body){
-    return new Promise((resolve, reject) => {
-        var coupons = {
-            cupones: []
-        };
-        var promiseArray = [];
-        for(const hit of body.hits){
-            if(req.query.magicKey == hit.price){
-                promiseArray.push(getDescForCoupon(hit.objectID,req.headers.token));
-            }
-        }
-        Promise.all(promiseArray).then(function(values) {
-            for(const hit of values){
-                if(hit.description.match(new RegExp('(?<=\\b'+ req.query.regexWord +'\\s)(\\w+)')) != null){
-                    coupons.cupones.push( {"id" : hit.id,"coupon" : hit.description.match(new RegExp('(?<=\\b'+ req.query.regexWord +'\\s)(\\w+)'))[0],defaultSession:hit.defaultSession})
-                }
-            }   
-            resolve (coupons);
-        });
-        
-    });
-}
-
-function getDescForCoupon(planId,token){
-    return new Promise((resolve, reject) => {
-        const url = base + "/plans/"+planId+"/";
-        options = {
-            url : url,
-            headers:{
-                "Accept": "application/json", 
-                "Screen": "android@xxhdpi", 
-                "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 6.0.1; A0001 Build/MTC20F)", 
-                "Authorization": "Token " + token,
-                "X-Client-Version": "4.5.21", 
-                "Accept-Language": "es"
-            }
-        }
-        request.get(options,function(error,response,body){
-            if(error !== null){
-                reject ({});
-            } else {
-                if(response.statusCode !== 200){
-                    reject ({});
-                } else {
-                    resolve( {
-                        "id" : JSON.parse(response.body).id,
-                        "description": JSON.parse(response.body).description,
-                        "defaultSession": JSON.parse(response.body).default_session.id
-                    });
-                }
-            }
-        });
-	});
 }
 
 function fbLogin(req,res){
-    const url = base + "/login/facebook/";
+    const url = "https://beam.feverup.com:443/api/4.2/login/facebook/";
     const xApiData = cryptoUtils.getXAPIData();
     options = {
         url : url,
@@ -112,7 +63,6 @@ function fbLogin(req,res){
         }
         
     }
-
     request.post(options,function(error,response,body){
         if(error !== null){
             res.status(500).send()
@@ -120,7 +70,7 @@ function fbLogin(req,res){
             if(response.statusCode !== 200){
                 res.status(response.statusCode).send()
             } else {
-                res.status(200).send({"token": body.token})
+                res.status(200).send({"token": body.access,"refresh":body.refresh})
             }
         }
     });
@@ -185,7 +135,7 @@ function getPlanInfo(req,res){
             "Accept": "application/json", 
             "Screen": "android@xxhdpi", 
             "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 6.0.1; A0001 Build/MTC20F)", 
-            "Authorization": "Token " + req.headers.token,
+            "Authorization": "Bearer " + req.headers.token,
             "X-Client-Version": "4.5.21", 
             "Accept-Language": "es"
         }
@@ -201,7 +151,7 @@ function getPlanInfo(req,res){
                 res.status(200).send({
                     "id" : JSON.parse(body).id,
                     "description": JSON.parse(body).description,
-                    "defaultSession": JSON.parse(body).default_session.id
+                    "defaultSession": ( JSON.parse(body).default_session !== null) ? JSON.parse(body).default_session.id : null
                 });
             }
         }
@@ -217,7 +167,7 @@ function attendEvent(req,res){
             "X-Client-Version": "4.5.5",
             "Screen": "android@xxhdpi",
             "Accept": "application/json",
-            "Authorization": "Token " + req.headers.token,
+            "Authorization": "Bearer " + req.headers.token,
             "Accept-Language": "en",
             "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 6.0.1; A0001 Build/MTC20F)",
         },
@@ -246,7 +196,7 @@ function redeemCode(req,res){
     options = {
         url : url,
         headers : {
-            "Authorization": "Token " + req.headers.token,
+            "Authorization": "Bearer " + req.headers.token,
             "Accept": "application/json",
             "Screen": "android@xxhdpi",
             "X-Client-Version": "5.4.5",
@@ -310,7 +260,91 @@ function getCities(req,res){
             "Accept": "application/json", 
             "Screen": "android@xxhdpi", 
             "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 6.0.1; A0001 Build/MTC20F)", 
-            "Authorization": "Token " + req.headers.token, 
+            "Authorization": "Bearer " + req.headers.token, 
+            "X-Client-Version": "4.5.21", 
+            "Accept-Language": "es"
+        }
+    }
+
+    request.get(options,function(error,response,body){
+        if(error !== null){
+            res.status(500).send()
+        } else {
+            if(response.statusCode !== 200){
+                res.status(404).send(body)
+            } else {
+                res.status(200).send(JSON.parse(body));
+            }
+        }
+    });
+
+}
+
+function getTickets(req,res){
+    const url = base + "/users/" + req.params.userid + "/tickets/?page=" + req.params.page;
+    options = {
+        url : url,
+        headers:{
+            "Accept": "application/json", 
+            "Screen": "android@xxhdpi", 
+            "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 6.0.1; A0001 Build/MTC20F)", 
+            "Authorization": "Bearer " + req.headers.token, 
+            "X-Client-Version": "4.5.21", 
+            "Accept-Language": "es"
+        }
+    }
+
+    request.get(options,function(error,response,body){
+        if(error !== null){
+            res.status(500).send()
+        } else {
+            if(response.statusCode !== 200){
+                res.status(404).send(body)
+            } else {
+                res.status(200).send(JSON.parse(body));
+            }
+        }
+    });
+
+}
+
+function getVouchers(req,res){
+    const url = base + "/users/" + req.params.userid + "/vouchers"
+    options = {
+        url : url,
+        headers:{
+            "Accept": "application/json", 
+            "Screen": "android@xxhdpi", 
+            "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 6.0.1; A0001 Build/MTC20F)", 
+            "Authorization": "Bearer " + req.headers.token, 
+            "X-Client-Version": "4.5.21", 
+            "Accept-Language": "es"
+        }
+    }
+
+    request.get(options,function(error,response,body){
+        if(error !== null){
+            res.status(500).send()
+        } else {
+            if(response.statusCode !== 200){
+                res.status(404).send(body)
+            } else {
+                res.status(200).send(JSON.parse(body));
+            }
+        }
+    });
+
+}
+
+function getFavorites(req,res){
+    const url = base + "/plans/favorites/?page=" + req.params.page;
+    options = {
+        url : url,
+        headers:{
+            "Accept": "application/json", 
+            "Screen": "android@xxhdpi", 
+            "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 6.0.1; A0001 Build/MTC20F)", 
+            "Authorization": "Bearer " + req.headers.token, 
             "X-Client-Version": "4.5.21", 
             "Accept-Language": "es"
         }
@@ -336,4 +370,7 @@ exports.redeemCode = redeemCode
 exports.getPlanInfo = getPlanInfo
 exports.fbLogin = fbLogin
 exports.attendEvent = attendEvent
-exports.findCoupons = findCoupons
+exports.refreshToken = refreshToken
+exports.getTickets = getTickets
+exports.getVouchers = getVouchers
+exports.getFavorites = getFavorites

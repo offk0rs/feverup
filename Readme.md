@@ -6,6 +6,8 @@ A reverse-engineered implementation of the Fever app API.
 
 ## Why I do this
 
+Documentation should be updated... 
+
 Feverup is a company that gives its customers money every week in exchange for joining free planes and redeeming codes. In this way, you can store a balance and use it in future purchases to go have a beer. The problem with this is that if, for example, they give away 6€, you have to sign up for 12 planes and redeem 12 coupons and since I'm lazy, I prefer to automate this whole process.
 
 ## Install
